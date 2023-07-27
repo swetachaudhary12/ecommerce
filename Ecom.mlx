@@ -1,0 +1,59 @@
+clc, clear all,format compact
+
+%importing data from csv file
+
+x=readtable("Ecom.csv")
+temp_data=table2array(x);
+temp_data=temp_data'
+x1=temp_data(1,:);
+x2=temp_data(2,:);
+x3=temp_data(3,:);
+x4=temp_data(4,:);
+
+
+%y=c1+c2x1+c3x2+c4x3+c5x4
+y=temp_data(5,:);
+
+
+N=size(x1,2);
+a=[N,sum(x1),sum(x2),sum(x3),sum(x4);
+   sum(x1),sum(x1.*x1),sum(x2.*x1),sum(x3.*x1),sum(x4.*x1);
+   sum(x2),sum(x1.*x2),sum(x2.*x2),sum(x3.*x2),sum(x4.*x2);
+   sum(x3),sum(x1.*x3),sum(x2.*x3),sum(x3.*x3),sum(x4.*x3);
+   sum(x4),sum(x1.*x4),sum(x2.*x4),sum(x3.*x4),sum(x4.*x4)];
+b=[sum(y);sum(y.*x1);sum(y.*x2);sum(y.*x3);sum(y.*x4)];
+ab=[a,b];
+n=size(a,1);
+for i=1:n-1
+  for j =i+1:n
+  alpha=ab(j,i)/ab(i,i);
+  ab(j,:)=ab(j,:)-alpha*ab(i,:);
+  end
+end
+
+
+%for back substitution
+c=zeros(5,1);
+for k=n:-1:1
+  c(k)=(ab(k,end)-ab(k,k+1:n)*c(k+1:n))/ab(k,k)
+end
+
+% c(k)  k----2,3,4,5  represent the coeffcient of dependent variable
+%c(k)  k----1 represent the coeffcient of independent variable
+
+
+trueValues = y;
+
+predictedValues= c(1)+ c(2)*x1+c(3)*x2+c(4)*x3+c(5)*x4;
+
+% Calculate the absolute error
+absoluteError = abs(trueValues - predictedValues);
+
+% Display the absolute error for each data point
+disp("Absolute Error:");
+disp(absoluteError);
+
+% Calculate and display the mean absolute error
+meanAbsoluteError = mean(absoluteError);
+disp("Mean Absolute Error:");
+disp(meanAbsoluteError);
